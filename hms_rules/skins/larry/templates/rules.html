@@ -1,0 +1,48 @@
+<roundcube:object name="doctype" value="html5" />
+<html>
+<head>
+<title><roundcube:object name="pagetitle" /></title>
+<roundcube:include file="/includes/links.html" />
+</head>
+<roundcube:if condition="env:extwin" /><body class="noscroll extwin"><roundcube:else /><body class="noscroll"><roundcube:endif />
+
+<roundcube:include file="/includes/header.html" />
+
+<div id="mainscreen" class="offset">
+
+<h1 class="voice"><roundcube:label name="settings" /> : <roundcube:label name="hms_rules.rules" /></h1>
+
+<roundcube:include file="/includes/settingstabs.html" />
+
+<div id="settings-right" role="main" aria-labelledby="aria-label-ruleslist">
+
+<div id="identitieslist" class="uibox listbox">
+<h2 class="boxtitle" id="aria-label-identitieslist"><roundcube:label name="hms_rules.rules" /></h2>
+<div class="scroller withfooter">
+<roundcube:object name="ruleslist" id="identities-table" class="listing" cellspacing="0" noheader="true" role="listbox" />
+</div>
+<div class="boxfooter">
+<roundcube:button command="plugin.hmsrules-add" type="link" title="hms_rules.newrule" class="listbutton add disabled" classAct="listbutton add" innerClass="inner" label="hms_rules.newrule" /><roundcube:button command="plugin.hmsrules-delete" type="link" title="delete" class="listbutton delete disabled" classAct="listbutton delete" innerClass="inner" label="delete" /><roundcube:button command="plugin.hmsrules-moveup" type="link" title="hms_rules.moveup" class="listbutton moveup disabled" classAct="listbutton moveup" innerClass="inner" label="hms_rules.moveup" /><roundcube:button command="plugin.hmsrules-movedown" type="link" title="hms_rules.movedown" class="listbutton movedown disabled" classAct="listbutton movedown" innerClass="inner" label="hms_rules.movedown" />
+</div>
+</div>
+
+
+<script type="text/javascript">
+  var identviewsplit = new rcube_splitter({id:'rulesviewsplitter', p1: '#identitieslist', p2: '#identity-details', orientation: 'v', relative: true, start:266, min:180, size:12 });
+  rcmail.add_onload('identviewsplit.init()');
+</script>
+
+<div id="identity-details" class="uibox contentbox">
+  <div class="iframebox">
+    <roundcube:object name="ruleframe" id="preferences-frame" style="width:100%; height:100%" frameborder="0" src="/watermark.html" title="hms_rules.editrulefromtitle" />
+  </div>
+</div>
+
+</div>
+
+</div>
+
+<roundcube:include file="/includes/footer.html" />
+
+</body>
+</html>

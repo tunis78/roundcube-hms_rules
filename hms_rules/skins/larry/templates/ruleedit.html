@@ -1,0 +1,22 @@
+<roundcube:object name="doctype" value="html5" />
+<html>
+<head>
+<title><roundcube:object name="pagetitle" /></title>
+<roundcube:include file="/includes/links.html" />
+</head>
+<body class="iframe">
+
+<h1 class="boxtitle"><roundcube:object name="plugin.steptitle" /></h1>
+
+<div id="preferences-details" class="boxcontent">
+<roundcube:object name="plugin.ruleform" class="propform" size="60" textareacols="60" textarearows="18" />
+</div>
+
+<div class="footerleft formbuttons">
+  <roundcube:button command="plugin.hmsrule-submit" type="input" class="button mainaction" label="save" condition="!env:rules_reload" /><roundcube:object name="plugin.abort" />
+</div>
+
+<roundcube:include file="/includes/footer.html" />
+
+</body>
+</html>

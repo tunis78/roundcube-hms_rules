@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title><roundcube:object name="pagetitle" /></title>
+<roundcube:include file="/includes/links.html" />
+<script type="text/javascript" src="/functions.js"></script>
+</head>
+<body class="iframe">
+
+<div id="identity-title" class="boxtitle"><roundcube:object name="plugin.steptitle" /></div>
+
+<div id="identity-details" class="boxcontent">
+  <roundcube:object name="plugin.ruleform" class="propform" size="60" textareacols="60" textarearows="18" />
+
+  <div id="formfooter">
+    <div class="footerindent">
+      <roundcube:button command="plugin.hmsrule-submit" type="input" class="button mainaction" label="save" condition="!env:rules_reload" /><roundcube:object name="plugin.abort" />
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
