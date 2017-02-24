@@ -1,4 +1,4 @@
-# hMailServer Rules Plugin for Roundcube
+hMailServer Rules Plugin for Roundcube
 ======================================
 Plugin that adds a possibility to change users rules using two
 methods (drivers) via Settings/Rules tab.
