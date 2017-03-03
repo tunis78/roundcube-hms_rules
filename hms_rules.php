@@ -3,7 +3,7 @@
 /**
  * hMailServer Rules Plugin for Roundcube
  *
- * @version 1
+ * @version 1.1
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
  * Copyright (C) 2017, Andreas Tunberg
@@ -60,6 +60,7 @@ class hms_rules extends rcube_plugin
 
         $this->register_action('plugin.rules', array($this, 'rules'));
         $this->register_action('plugin.rules-edit', array($this, 'rules_edit'));
+        $this->register_action('plugin.rules-actions', array($this, 'rules_actions'));
         $this->register_action('plugin.rules-action', array($this, 'rules_action'));
         $this->register_action('plugin.rules-criteria', array($this, 'rules_criteria'));
 
@@ -77,22 +78,6 @@ class hms_rules extends rcube_plugin
         );
 
         return $args;
-    }
-
-    function rules_init()
-    {
-
-        $this->rc->output->add_handlers(array(
-            'ruleframe' => array($this, 'rules_frame'),
-            'ruleslist' => array($this, 'rules_list'),
-        ));
-
-        $this->rc->output->include_script('list.js');
-
-        $this->rc->output->set_pagetitle($this->gettext('editrules'));
-        $this->rc->output->add_label('hms_rules.ruledeleteconfirm', 'hms_rules.disabled');
-
-        $this->rc->output->send('hms_rules.rules');
     }
 
     function steptitle()
@@ -114,8 +99,26 @@ class hms_rules extends rcube_plugin
 
     function rules()
     {
-        $rid = rcube_utils::get_input_value('_rid', rcube_utils::INPUT_GET);
-        if (($action = rcube_utils::get_input_value('_act', rcube_utils::INPUT_GET)) && $rid) {
+        if ($rid = rcube_utils::get_input_value('_rid', rcube_utils::INPUT_GET)) {
+            $this->rc->output->set_env('rules_selected', $rid);
+        }
+
+        $this->rc->output->add_handlers(array(
+            'ruleframe' => array($this, 'rules_frame'),
+            'ruleslist' => array($this, 'rules_list'),
+        ));
+
+        $this->rc->output->include_script('list.js');
+
+        $this->rc->output->set_pagetitle($this->gettext('editrules'));
+        $this->rc->output->add_label('hms_rules.ruledeleteconfirm', 'hms_rules.disabled');
+
+        $this->rc->output->send('hms_rules.rules');
+    }
+
+    function rules_actions()
+    {
+        if (($rid = rcube_utils::get_input_value('_rid', rcube_utils::INPUT_POST)) && ($action = rcube_utils::get_input_value('_act', rcube_utils::INPUT_POST))) {
 
             switch($action) {
                 case 'delete':
@@ -131,18 +134,13 @@ class hms_rules extends rcube_plugin
             }
 
             if (!$result) {
+                $this->rc->output->command('plugin.rules-reload', $rid);
                 $this->rc->output->command('display_message', $this->gettext('rulesuccessfullyupdated'), 'confirmation');
             }
             else {
                 $this->rc->output->command('display_message', $result, 'error');
             }
         }
-
-        if ($rid) {
-            $this->rc->output->set_env('rules_selected', $rid);
-        }
-
-        $this->rules_init();
     }
 
     function rules_edit()

@@ -79,15 +79,15 @@ class rcube_hmail_remote_rules
         return $result['text'];
     }
 
-    private function remote_access($url,$data)
+    private function remote_access($url, $data)
     {
         $data_string = http_build_query($data);
 
         $ch = curl_init($url);
-        curl_setopt($ch,CURLOPT_POST,1);
-        curl_setopt($ch,CURLOPT_POSTFIELDS,$data_string); 
-        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-        curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false); 
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
         $response = curl_exec($ch);
 
         if (!curl_errno($ch)) {

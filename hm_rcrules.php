@@ -3,7 +3,7 @@
 /**
  * hMailserver remote rules changer
  *
- * @version 1.0
+ * @version 1.1
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
  * Copyright (C) 2017, Andreas Tunberg
@@ -32,10 +32,11 @@ if($_SERVER['REMOTE_ADDR'] !== $rc_remote_ip)
 	exit('You are forbidden!');
 }
 
-define('HMS_ERROR',1);
+define('HMS_ERROR', 1);
+define('HMS_SUCCESS', 0);
 
 if (empty($_POST['action']) || empty($_POST['email']) || empty($_POST['password']))
-	sendResult('Required fields can not be empty.',HMS_ERROR);
+	sendResult('Required fields can not be empty.', HMS_ERROR);
 
 $action = $_POST['action'];
 $email = $_POST['email'];
@@ -45,7 +46,7 @@ try {
 	$obApp = new COM("hMailServer.Application", NULL, CP_UTF8);
 }
 catch (Exception $e) {
-	sendResult(trim(strip_tags($e->getMessage())),HMS_ERROR);
+	sendResult(trim(strip_tags($e->getMessage())), HMS_ERROR);
 }
 $temparr = explode('@', $email);
 $domain = $temparr[1];
@@ -56,7 +57,7 @@ try {
 	switch($action){
 		case 'admin':
 			$admin = $obAccount->AdminLevel() == 2 ? 1 : 0;
-			return array('admin' => $admin);
+			sendResult(array('admin' => $admin));
 		case 'rules_load':
 			sendResult(rulesLoad($obAccount->Rules()));
 		case 'rule_load':
@@ -95,8 +96,8 @@ try {
 			sendResult($critdata);
 		case 'criteria_edit':
 			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			if ($data['cid'])
-				$criteria = $rule->Criterias->ItemByDBID((int)$_POST['cid']);
+			if ($cid = (int)$_POST['cid'])
+				$criteria = $rule->Criterias->ItemByDBID($cid);
 			else
 				$criteria = $rule->Criterias->Add();
 
@@ -129,8 +130,8 @@ try {
 			sendResult($actdata);
 		case 'action_edit':
 			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			if ((int)$_POST['aid'])
-				$action = $rule->Actions->ItemByDBID((int)$_POST['aid']);
+			if ($aid = (int)$_POST['aid'])
+				$action = $rule->Actions->ItemByDBID($aid);
 			else
 				$action = $rule->Actions->Add();
 
@@ -160,26 +161,26 @@ try {
 			$rule->Actions->ItemByDBID((int)$_POST['aid'])->Delete();
 			sendResult(HMS_SUCCESS);
 	}
-	sendResult('Action unknown.',HMS_ERROR);
+	sendResult('Action unknown', HMS_ERROR);
 }
 catch (Exception $e) {
-	sendResult(trim(strip_tags($e->getMessage())),HMS_ERROR);
+	sendResult(trim(strip_tags($e->getMessage())), HMS_ERROR);
 }
 
-function sendResult($message,$error=0)
+function sendResult($message, $error = 0)
 {
-	$out=array('error'=>$error,'text'=>$message);
+	$out=array('error' => $error, 'text' => $message);
 	exit(serialize($out));
 }
 
 function rulesLoad($rules)
 {
 	$count = $rules->Count();
-	$data=array();
+	$data = array();
 
 	for ($i = 0; $i < $count; $i++) {
 		$rule = $rules->Item($i);
-		$data[]=array(
+		$data[] = array(
 			'name'	=> $rule->Name,
 			'rid'	 => $rule->ID,
 			'enabled' => $rule->Active ?: 0
@@ -190,7 +191,7 @@ function rulesLoad($rules)
 
 function ruleLoad($rule)
 {
-	$data=array();
+	$data = array();
 
 	$data['name'] = $rule->Name;
 	$data['active'] = $rule->Active ?: 0;

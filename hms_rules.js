@@ -30,7 +30,12 @@ window.rcmail && rcmail.addEventListener('init', function(evt) {
     rcmail.register_command('plugin.hmsrules-add', function() { rcmail.hmsrules_add() },true);
     rcmail.register_command('plugin.hmsrules-delete', function() { rcmail.hmsrules_del() });
     rcmail.register_command('plugin.hmsrules-moveup', function() { rcmail.hmsrules_moveup() });
-    rcmail.register_command('plugin.hmsrules-movedown', function() { rcmail.hmsrules_movedown()    });
+    rcmail.register_command('plugin.hmsrules-movedown', function() { rcmail.hmsrules_movedown() });
+    
+    rcmail.addEventListener('plugin.rules-reload', function(id) { 
+        var rid = (id > 0) ? '&_rid=' + id : '';
+        location.href = './?_task=settings&_action=plugin.rules' + rid;
+    } );
 
     if (rcmail.gui_objects.rulelist) {
         rcmail.rules_list = new rcube_list_widget(rcmail.gui_objects.rulelist,
@@ -133,8 +138,10 @@ rcube_webmail.prototype.hmsrules_del = function()
 {
     var id = this.rules_list.get_single_selection();
     if (id != null && confirm(this.get_label('hms_rules.ruledeleteconfirm'))) {
-        this.set_busy(true, 'loading');
-        location.href = './?_task=settings&_action=plugin.rules&_act=delete&_rid=' + id;
+        this.set_busy(true);
+        this.http_post('plugin.rules-actions', '_act=delete&_rid=' + id);
+        this.set_busy(false);
+        //location.href = './?_task=settings&_action=plugin.rules&_act=delete&_rid=' + id;
     }
 };
 
@@ -142,8 +149,10 @@ rcube_webmail.prototype.hmsrules_moveup = function()
 {
     var id = this.rules_list.get_single_selection();
     if (id != null) {
-        this.set_busy(true, 'loading');
-        location.href = './?_task=settings&_action=plugin.rules&_act=moveup&_rid=' + id;
+        this.set_busy(true);
+        this.http_post('plugin.rules-actions', '_act=moveup&_rid=' + id);
+        this.set_busy(false);
+        //location.href = './?_task=settings&_action=plugin.rules&_act=moveup&_rid=' + id;
     }
 };
 
@@ -151,8 +160,10 @@ rcube_webmail.prototype.hmsrules_movedown = function()
 {
     var id = this.rules_list.get_single_selection();
     if (id != null) {
-        this.set_busy(true, 'loading');
-        location.href = './?_task=settings&_action=plugin.rules&_act=movedown&_rid=' + id;
+        this.set_busy(true);
+        this.http_post('plugin.rules-actions', '_act=movedown&_rid=' + id);
+        this.set_busy(false);
+        //location.href = './?_task=settings&_action=plugin.rules&_act=movedown&_rid=' + id;
     }
 };
 
