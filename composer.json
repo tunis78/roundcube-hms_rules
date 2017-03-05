@@ -1,9 +1,9 @@
 {
     "name": "tunis78/hms_rules",
     "type": "roundcube-plugin",
-    "description": "HMailServer Rules Change for Roundcube. Plugin adds a possibility to change user rules using two methods (drivers) via Settings/Rules tab.",
+    "description": "hMailServer Rules Change for Roundcube. Plugin adds a possibility to change user rules using two methods (drivers) via Settings/Rules tab.",
     "license": "GPLv3+",
-    "version": "1.1",
+    "version": "1.2",
     "homepage": "https://github.com/tunis78/roundcube-hms_rules",
     "authors": [
         {

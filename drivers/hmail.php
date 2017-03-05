@@ -3,7 +3,7 @@
 /**
  * hMailserver rules driver
  *
- * @version 1.0
+ * @version 1.2
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
  * Copyright (C) 2017, Andreas Tunberg
@@ -35,56 +35,55 @@ class rcube_hmail_rules
         return $this->data_handler($data);
     }
 
-    private function _rules_load($rules)
+    private function _rules_load($obRules)
     {
-        $count = $rules->Count();
-        $data=array();
+        $count = $obRules->Count();
+        $data = array();
 
         for ($i = 0; $i < $count; $i++) {
-            $rule = $rules->Item($i);
+            $obRule = $obRules->Item($i);
             $data[]=array(
-                'name'    => $rule->Name,
-                'rid'     => $rule->ID,
-                'enabled' => $rule->Active ?: 0
+                'name'    => $obRule->Name,
+                'rid'     => $obRule->ID,
+                'enabled' => $obRule->Active ?: 0
             );
         }
 
         return $data;
     }
 
-    private function _rule_load($rule)
+    private function _rule_load($obRule)
     {
-        $data=array();
-
-        $data['name'] = $rule->Name;
-        $data['active'] = $rule->Active ?: 0;
-        $data['useand'] = $rule->UseAND ?: 0;
-
-        $data['criterias'] = array();
-        $criterias = $rule->Criterias;
-        $count = $criterias->Count;
+        $data = array(
+            'name'      => $obRule->Name,
+            'active'    => $obRule->Active ?: 0,
+            'useand'    => $obRule->UseAND ?: 0,
+            'criterias' => array(),
+            'actions'   => array()
+        );
+        $obCriterias = $obRule->Criterias;
+        $count = $obCriterias->Count;
         for ($i = 0; $i < $count; $i++) {
-            $c = array();
-            $criteria = $criterias->Item($i);
-            $c['id'] = $criteria->ID;
-            $c['usepredefined'] = $criteria->UsePredefined ?: 0;
-
-            $c['predefinedfield'] = $criteria->PredefinedField;
-            $c['headerfield'] = $criteria->HeaderField;
-
-            $c['matchtype'] = $criteria->MatchType;
-            $c['matchvalue'] = $criteria->MatchValue;
+            $obCriteria = $obCriterias->Item($i);
+            $c = array(
+                'id'              => $obCriteria->ID,
+                'usepredefined'   => $obCriteria->UsePredefined ?: 0,
+                'predefinedfield' => $obCriteria->PredefinedField,
+                'headerfield'     => $obCriteria->HeaderField,
+                'matchtype'       => $obCriteria->MatchType,
+                'matchvalue'      => $obCriteria->MatchValue
+            );
             $data['criterias'][] = $c;
         }
 
-        $data['actions'] = array();
-        $actions = $rule->Actions;
-        $count = $actions->Count;
+        $obActions = $obRule->Actions;
+        $count = $obActions->Count;
         for ($i = 0; $i < $count; $i++) {
-            $a = array();
-            $action = $actions->Item($i);
-            $a['id'] = $action->ID;
-            $a['type'] = $action->Type;
+            $obAction = $obActions->Item($i);
+            $a = array(
+                'id'   => $obAction->ID,
+                'type' => $obAction->Type
+            );
             $data['actions'][] = $a;
         }
 
@@ -109,12 +108,12 @@ class rcube_hmail_rules
         }
 
         $username = $rcmail->user->data['username'];
-        if (strstr($username,'@')){
+        if (strstr($username, '@')){
             $temparr = explode('@', $username);
             $domain = $temparr[1];
         }
         else {
-            $domain = $rcmail->config->get('username_domain',false);
+            $domain = $rcmail->config->get('username_domain', false);
             if (!$domain) {
                 rcube::write_log('errors','Plugin hms_rules (hmail driver): $config[\'username_domain\'] is not defined.');
                 return HMS_ERROR;
@@ -122,9 +121,9 @@ class rcube_hmail_rules
             $username = $username . '@' . $domain;
         }
 
-        $pwd = $rcmail->decrypt($_SESSION['password']);
+        $password = $rcmail->decrypt($_SESSION['password']);
 
-        $obApp->Authenticate($username, $pwd);
+        $obApp->Authenticate($username, $password);
         try {
             $obAccount = $obApp->Domains->ItemByName($domain)->Accounts->ItemByAddress($username);
 
@@ -135,107 +134,109 @@ class rcube_hmail_rules
                 case 'rules_load':
                     return $this->_rules_load($obAccount->Rules());
                 case 'rule_load':
-                    return $this->_rule_load($obAccount->Rules->ItemByDBID($data['rid']));
+                    return $this->_rule_load($obAccount->Rules->ItemByDBID((int)$data['rid']));
                 case 'rule_edit':
-                    if ($data['rid'])
-                        $rule = $obAccount->Rules->ItemByDBID($data['rid']);
+                    if ($rid = (int)$data['rid'])
+                        $obRule = $obAccount->Rules->ItemByDBID($rid);
                     else
-                        $rule = $obAccount->Rules->Add();
+                        $obRule = $obAccount->Rules->Add();
 
-                    $rule->Name = $data['name'];
-                    $rule->Active = $data['active'] == null ? 0 : 1;
-                    $rule->UseAND = $data['useand'];
-                    $rule->Save();
-                    return array('rid' => $rule->ID);
+                    $obRule->Name = $data['name'];
+                    $obRule->Active = $data['active'] == null ? 0 : 1;
+                    $obRule->UseAND = (int)$data['useand'];
+                    $obRule->Save();
+                    return array('rid' => $obRule->ID);
                 case 'rule_delete':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    $rule->Delete();
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    $obRule->Delete();
                     return HMS_SUCCESS; 
                 case 'rule_moveup':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    $rule->MoveUp();
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    $obRule->MoveUp();
                     return HMS_SUCCESS; 
                 case 'rule_movedown':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    $rule->MoveDown();
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    $obRule->MoveDown();
                     return HMS_SUCCESS; 
                 case 'criteria_load':
-                    $criteria = $obAccount->Rules->ItemByDBID($data['rid'])->Criterias->ItemByDBID($data['cid']);
-                    $critdata=array();
-                    $critdata['usepredefined'] = $criteria->UsePredefined ?: 0;
-                    $critdata['predefinedfield'] = $criteria->PredefinedField;
-                    $critdata['headerfield'] = $criteria->HeaderField;
-                    $critdata['matchtype'] = $criteria->MatchType;
-                    $critdata['matchvalue'] = $criteria->MatchValue;
+                    $obCriteria = $obAccount->Rules->ItemByDBID((int)$data['rid'])->Criterias->ItemByDBID((int)$data['cid']);
+                    $critdata=array(
+                        'usepredefined'   => $obCriteria->UsePredefined ?: 0,
+                        'predefinedfield' => $obCriteria->PredefinedField,
+                        'headerfield'     => $obCriteria->HeaderField,
+                        'matchtype'       => $obCriteria->MatchType,
+                        'matchvalue'      => $obCriteria->MatchValue
+                    );
                     return $critdata;
                 case 'criteria_edit':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    if ($data['cid'])
-                        $criteria = $rule->Criterias->ItemByDBID($data['cid']);
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    if ($cid = (int)$data['cid'])
+                        $obCriteria = $obRule->Criterias->ItemByDBID($cid);
                     else
-                        $criteria = $rule->Criterias->Add();
+                        $obCriteria = $obRule->Criterias->Add();
 
-                    $criteria->UsePredefined = $data['usepredefined'];
-                    $criteria->PredefinedField = $data['predefinedfield'];
-                    $criteria->HeaderField = $data['headerfield'];
-                    $criteria->MatchType = $data['matchtype'];
-                    $criteria->MatchValue = $data['matchvalue'];
-                    $criteria->Save();
-                    $rule->Save();
-                    return array('cid' => $criteria->ID);
+                    $obCriteria->UsePredefined = (int)$data['usepredefined'];
+                    $obCriteria->PredefinedField = (int)$data['predefinedfield'];
+                    $obCriteria->HeaderField = $data['headerfield'];
+                    $obCriteria->MatchType = (int)$data['matchtype'];
+                    $obCriteria->MatchValue = $data['matchvalue'];
+                    $obCriteria->Save();
+                    $obRule->Save();
+                    return array('cid' => $obCriteria->ID);
                 case 'criteria_delete':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    $rule->Criterias->ItemByDBID($data['cid'])->Delete();
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    $obRule->Criterias->ItemByDBID((int)$data['cid'])->Delete();
                     return HMS_SUCCESS;
                 case 'action_load':
-                    $action = $obAccount->Rules->ItemByDBID($data['rid'])->Actions->ItemByDBID($data['aid']);
-                    $actdata=array();
-                    $actdata['admin'] = $obAccount->AdminLevel() == 2 ? 1 : 0;
-                    $actdata['to'] = $action->To;
-                    $actdata['imapfolder'] = $action->IMAPFolder;
-                    $actdata['scriptfunction'] = $action->ScriptFunction;
-                    $actdata['fromname'] = $action->FromName;
-                    $actdata['fromaddress'] = $action->FromAddress;
-                    $actdata['subject'] = $action->Subject;
-                    $actdata['body'] = $action->Body;
-                    $actdata['headername'] = $action->HeaderName;
-                    $actdata['value'] = $action->Value;
-                    $actdata['type'] = $action->Type;
+                    $obAction = $obAccount->Rules->ItemByDBID((int)$data['rid'])->Actions->ItemByDBID((int)$data['aid']);
+                    $actdata = array(
+                        'admin'          => $obAccount->AdminLevel() == 2 ? 1 : 0,
+                        'to'             => $obAction->To,
+                        'imapfolder'     => $obAction->IMAPFolder,
+                        'scriptfunction' => $obAction->ScriptFunction,
+                        'fromname'       => $obAction->FromName,
+                        'fromaddress'    => $obAction->FromAddress,
+                        'subject'        => $obAction->Subject,
+                        'body'           => $obAction->Body,
+                        'headername'     => $obAction->HeaderName,
+                        'value'          => $obAction->Value,
+                        'type'           => $obAction->Type
+                    );
                     return $actdata;
                 case 'action_edit':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    if ($data['aid'])
-                        $action = $rule->Actions->ItemByDBID($data['aid']);
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    if ($aid = (int)$data['aid'])
+                        $obAction = $obRule->Actions->ItemByDBID($aid);
                     else
-                        $action = $rule->Actions->Add();
+                        $obAction = $obRule->Actions->Add();
 
-                    $action->Type = $data['type'];
-                    $action->To = $data['to'];
-                    $action->IMAPFolder = $data['imapfolder'];
-                    $action->ScriptFunction = $data['scriptfunction'];
-                    $action->FromName = $data['fromname'];
-                    $action->FromAddress = $data['fromaddress'];
-                    $action->Subject = $data['subject'];
-                    $action->Body = $data['body'];
-                    $action->HeaderName = $data['headername'];
-                    $action->Value = $data['value'];
-                    $action->Save();
-                    $rule->Save();
-                    return array('aid' => $action->ID);
+                    $obAction->Type = (int)$data['type'];
+                    $obAction->To = $data['to'];
+                    $obAction->IMAPFolder = $data['imapfolder'];
+                    $obAction->ScriptFunction = $data['scriptfunction'];
+                    $obAction->FromName = $data['fromname'];
+                    $obAction->FromAddress = $data['fromaddress'];
+                    $obAction->Subject = $data['subject'];
+                    $obAction->Body = $data['body'];
+                    $obAction->HeaderName = $data['headername'];
+                    $obAction->Value = $data['value'];
+                    $obAction->Save();
+                    $obRule->Save();
+                    return array('aid' => $obAction->ID);
                 case 'action_moveup':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    $rule->Actions->ItemByDBID($data['aid'])->MoveUp();
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    $obRule->Actions->ItemByDBID((int)$data['aid'])->MoveUp();
                     return HMS_SUCCESS;
                 case 'action_movedown':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    $rule->Actions->ItemByDBID($data['aid'])->MoveDown();
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    $obRule->Actions->ItemByDBID((int)$data['aid'])->MoveDown();
                     return HMS_SUCCESS;
                 case 'action_delete':
-                    $rule = $obAccount->Rules->ItemByDBID($data['rid']);
-                    $rule->Actions->ItemByDBID($data['aid'])->Delete();
+                    $obRule = $obAccount->Rules->ItemByDBID((int)$data['rid']);
+                    $obRule->Actions->ItemByDBID((int)$data['aid'])->Delete();
                     return HMS_SUCCESS; 
             }
-
+            return HMS_ERROR;
         }
         catch (Exception $e) {
             rcube::write_log('errors', 'Plugin hms_rules (hmail driver): ' . trim(strip_tags($e->getMessage())));

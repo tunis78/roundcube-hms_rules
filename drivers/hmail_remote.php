@@ -59,13 +59,13 @@ class rcube_hmail_remote_rules
             $username = $username . '@' . $domain;
         }
 
-        $pwd = $rcmail->decrypt($_SESSION['password']);
+        $password = $rcmail->decrypt($_SESSION['password']);
 
         $dataToSend = $data;
         $dataToSend['email'] = $username;
-        $dataToSend['password'] = $pwd;
+        $dataToSend['password'] = $password;
 
-        $result = $this->remote_access($hmailRemoteUrl,$dataToSend);
+        $result = $this->remote_access($hmailRemoteUrl, $dataToSend);
 
         if(!is_array($result)) {
             rcube::write_log('errors', 'Plugin hms_rules (hmail remote driver): ' . $result);

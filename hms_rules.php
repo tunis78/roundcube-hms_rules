@@ -3,7 +3,7 @@
 /**
  * hMailServer Rules Plugin for Roundcube
  *
- * @version 1.1
+ * @version 1.2
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
  * Copyright (C) 2017, Andreas Tunberg
@@ -43,20 +43,16 @@ class hms_rules extends rcube_plugin
     public $task = "settings";
     private $rc;
     private $driver;
-    private $rid;
-    private $cid;
-    private $aid;
+    private $rid = 0;
+    private $cid = 0;
+    private $aid = 0;
     private $reload = false;
     public $steptitle;
 
     function init()
     {
-
-        $this->rc = rcube::get_instance();
-        $this->load_config();
         $this->add_texts('localization/');
         $this->include_stylesheet($this->local_skin_path() . '/hms_rules.css');
-        $this->include_script('hms_rules.js');
 
         $this->register_action('plugin.rules', array($this, 'rules'));
         $this->register_action('plugin.rules-edit', array($this, 'rules_edit'));
@@ -97,8 +93,16 @@ class hms_rules extends rcube_plugin
         return $abort_button;
     }
 
+    function rules_init()
+    {
+        $this->rc = rcube::get_instance();
+        $this->load_config();
+        $this->include_script('hms_rules.js');
+    }
     function rules()
     {
+        $this->rules_init();
+
         if ($rid = rcube_utils::get_input_value('_rid', rcube_utils::INPUT_GET)) {
             $this->rc->output->set_env('rules_selected', $rid);
         }
@@ -118,6 +122,8 @@ class hms_rules extends rcube_plugin
 
     function rules_actions()
     {
+        $this->rules_init();
+
         if (($rid = rcube_utils::get_input_value('_rid', rcube_utils::INPUT_POST)) && ($action = rcube_utils::get_input_value('_act', rcube_utils::INPUT_POST))) {
 
             switch($action) {
@@ -145,6 +151,8 @@ class hms_rules extends rcube_plugin
 
     function rules_edit()
     {
+        $this->rules_init();
+
         if (!empty($_GET['_rid']) || !empty($_POST['_rid'])) {
             $this->rid = rcube_utils::get_input_value('_rid', rcube_utils::INPUT_GPC);
         }
@@ -204,6 +212,8 @@ class hms_rules extends rcube_plugin
 
     function rules_action()
     {
+        $this->rules_init();
+
         if (!empty($_GET['_rid']) || !empty($_POST['_rid'])) {
             $this->rid = rcube_utils::get_input_value('_rid', rcube_utils::INPUT_GPC);
         } else {
@@ -257,6 +267,8 @@ class hms_rules extends rcube_plugin
 
     function rules_criteria()
     {
+        $this->rules_init();
+
         if (!empty($_GET['_rid']) || !empty($_POST['_rid'])) {
             $this->rid = rcube_utils::get_input_value('_rid', rcube_utils::INPUT_GPC);
         } else {
@@ -942,7 +954,7 @@ class hms_rules extends rcube_plugin
         return $result;
     }
 
-    private function _save($data,$response = false)
+    private function _save($data, $response = false)
     {
         if (is_object($this->driver)) {
             $result = $this->driver->save($data);

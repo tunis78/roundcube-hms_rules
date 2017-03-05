@@ -3,7 +3,7 @@
 /**
  * hMailserver remote rules changer
  *
- * @version 1.1
+ * @version 1.2
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
  * Copyright (C) 2017, Andreas Tunberg
@@ -22,7 +22,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
  
-$rc_remote_ip = 'YOUR ROUNDCUBE IP ADDRESS';
+$rc_remote_ip = 'YOUR ROUNDCUBE SERVER IP ADDRESS';
 
 /*****************/
 
@@ -63,102 +63,104 @@ try {
 		case 'rule_load':
 			sendResult(ruleLoad($obAccount->Rules->ItemByDBID((int)$_POST['rid'])));
 		case 'rule_edit':
-			if ((int)$_POST['rid'])
-				$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			if ($rid = (int)$_POST['rid'])
+				$obRule = $obAccount->Rules->ItemByDBID($rid);
 			else
-				$rule = $obAccount->Rules->Add();
+				$obRule = $obAccount->Rules->Add();
 
-			$rule->Name = $_POST['name'];
-			$rule->Active = $_POST['active'] == null ? 0 : 1;
-			$rule->UseAND = $_POST['useand'];
-			$rule->Save();
-			sendResult(array('rid' => $rule->ID));
+			$obRule->Name = $_POST['name'];
+			$obRule->Active = isset($_POST['active']) ?: 0;
+			$obRule->UseAND = (int)$_POST['useand'];
+			$obRule->Save();
+			sendResult(array('rid' => $obRule->ID));
 		case 'rule_delete':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			$rule->Delete();
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule->Delete();
 			sendResult(HMS_SUCCESS);
 		case 'rule_moveup':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			$rule->MoveUp();
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule->MoveUp();
 			sendResult(HMS_SUCCESS);
 		case 'rule_movedown':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			$rule->MoveDown();
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule->MoveDown();
 			sendResult(HMS_SUCCESS);
 		case 'criteria_load':
-			$criteria = $obAccount->Rules->ItemByDBID((int)$_POST['rid'])->Criterias->ItemByDBID((int)$_POST['cid']);
-			$critdata=array();
-			$critdata['usepredefined'] = $criteria->UsePredefined ?: 0;
-			$critdata['predefinedfield'] = $criteria->PredefinedField;
-			$critdata['headerfield'] = $criteria->HeaderField;
-			$critdata['matchtype'] = $criteria->MatchType;
-			$critdata['matchvalue'] = $criteria->MatchValue;
+			$obCriteria = $obAccount->Rules->ItemByDBID((int)$_POST['rid'])->Criterias->ItemByDBID((int)$_POST['cid']);
+			$critdata = array(
+				'usepredefined'   => $obCriteria->UsePredefined ?: 0,
+				'predefinedfield' => $obCriteria->PredefinedField,
+				'headerfield'     => $obCriteria->HeaderField,
+				'matchtype'       => $obCriteria->MatchType,
+				'matchvalue'      => $obCriteria->MatchValue
+			);
 			sendResult($critdata);
 		case 'criteria_edit':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
 			if ($cid = (int)$_POST['cid'])
-				$criteria = $rule->Criterias->ItemByDBID($cid);
+				$obCriteria = $obRule->Criterias->ItemByDBID($cid);
 			else
-				$criteria = $rule->Criterias->Add();
+				$obCriteria = $obRule->Criterias->Add();
 
-			$criteria->UsePredefined = (int)$_POST['usepredefined'];
-			$criteria->PredefinedField = (int)$_POST['predefinedfield'];
-			$criteria->HeaderField = $_POST['headerfield'];
-			$criteria->MatchType = (int)$_POST['matchtype'];
-			$criteria->MatchValue = $_POST['matchvalue'];
-			$criteria->Save();
-			$rule->Save();
-			sendResult(array('cid' => $criteria->ID));
+			$obCriteria->UsePredefined = (int)$_POST['usepredefined'];
+			$obCriteria->PredefinedField = (int)$_POST['predefinedfield'];
+			$obCriteria->HeaderField = $_POST['headerfield'];
+			$obCriteria->MatchType = (int)$_POST['matchtype'];
+			$obCriteria->MatchValue = $_POST['matchvalue'];
+			$obCriteria->Save();
+			$obRule->Save();
+			sendResult(array('cid' => $obCriteria->ID));
 		case 'criteria_delete':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			$rule->Criterias->ItemByDBID((int)$_POST['cid'])->Delete();
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule->Criterias->ItemByDBID((int)$_POST['cid'])->Delete();
 			sendResult(HMS_SUCCESS);
 		case 'action_load':
-			$action = $obAccount->Rules->ItemByDBID((int)$_POST['rid'])->Actions->ItemByDBID((int)$_POST['aid']);
-			$actdata=array();
-			$actdata['admin'] = $obAccount->AdminLevel() == 2 ? 1 : 0;
-			$actdata['to'] = $action->To;
-			$actdata['imapfolder'] = $action->IMAPFolder;
-			$actdata['scriptfunction'] = $action->ScriptFunction;
-			$actdata['fromname'] = $action->FromName;
-			$actdata['fromaddress'] = $action->FromAddress;
-			$actdata['subject'] = $action->Subject;
-			$actdata['body'] = $action->Body;
-			$actdata['headername'] = $action->HeaderName;
-			$actdata['value'] = $action->Value;
-			$actdata['type'] = $action->Type;
+			$obAction = $obAccount->Rules->ItemByDBID((int)$_POST['rid'])->Actions->ItemByDBID((int)$_POST['aid']);
+			$actdata = array(
+				'admin' => $obAccount->AdminLevel() == 2 ? 1 : 0,
+				'to' => $obAction->To,
+				'imapfolder' => $obAction->IMAPFolder,
+				'scriptfunction' => $obAction->ScriptFunction,
+				'fromname' => $obAction->FromName,
+				'fromaddress' => $obAction->FromAddress,
+				'subject' => $obAction->Subject,
+				'body' => $obAction->Body,
+				'headername' => $obAction->HeaderName,
+				'value' => $obAction->Value,
+				'type' => $obAction->Type
+			);
 			sendResult($actdata);
 		case 'action_edit':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
 			if ($aid = (int)$_POST['aid'])
-				$action = $rule->Actions->ItemByDBID($aid);
+				$obAction = $obRule->Actions->ItemByDBID($aid);
 			else
-				$action = $rule->Actions->Add();
+				$obAction = $obRule->Actions->Add();
 
-			$action->Type = (int)$_POST['type'];
-			$action->To = $_POST['to'];
-			$action->IMAPFolder = $_POST['imapfolder'];
-			$action->ScriptFunction = $_POST['scriptfunction'];
-			$action->FromName = $_POST['fromname'];
-			$action->FromAddress = $_POST['fromaddress'];
-			$action->Subject = $_POST['subject'];
-			$action->Body = $_POST['body'];
-			$action->HeaderName = $_POST['headername'];
-			$action->Value = $_POST['value'];
-			$action->Save();
-			$rule->Save();
-			sendResult(array('aid' => $action->ID));
+			$obAction->Type = (int)$_POST['type'];
+			$obAction->To = $_POST['to'];
+			$obAction->IMAPFolder = $_POST['imapfolder'];
+			$obAction->ScriptFunction = $_POST['scriptfunction'];
+			$obAction->FromName = $_POST['fromname'];
+			$obAction->FromAddress = $_POST['fromaddress'];
+			$obAction->Subject = $_POST['subject'];
+			$obAction->Body = $_POST['body'];
+			$obAction->HeaderName = $_POST['headername'];
+			$obAction->Value = $_POST['value'];
+			$obAction->Save();
+			$obRule->Save();
+			sendResult(array('aid' => $obAction->ID));
 		case 'action_moveup':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			$rule->Actions->ItemByDBID((int)$_POST['aid'])->MoveUp();
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule->Actions->ItemByDBID((int)$_POST['aid'])->MoveUp();
 			sendResult(HMS_SUCCESS);
 		case 'action_movedown':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			$rule->Actions->ItemByDBID((int)$_POST['aid'])->MoveDown();
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule->Actions->ItemByDBID((int)$_POST['aid'])->MoveDown();
 			sendResult(HMS_SUCCESS);
 		case 'action_delete':
-			$rule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
-			$rule->Actions->ItemByDBID((int)$_POST['aid'])->Delete();
+			$obRule = $obAccount->Rules->ItemByDBID((int)$_POST['rid']);
+			$obRule->Actions->ItemByDBID((int)$_POST['aid'])->Delete();
 			sendResult(HMS_SUCCESS);
 	}
 	sendResult('Action unknown', HMS_ERROR);
@@ -169,59 +171,58 @@ catch (Exception $e) {
 
 function sendResult($message, $error = 0)
 {
-	$out=array('error' => $error, 'text' => $message);
+	$out = array('error' => $error, 'text' => $message);
 	exit(serialize($out));
 }
 
-function rulesLoad($rules)
+function rulesLoad($obRules)
 {
-	$count = $rules->Count();
+	$count = $obRules->Count();
 	$data = array();
 
 	for ($i = 0; $i < $count; $i++) {
-		$rule = $rules->Item($i);
+		$obRule = $obRules->Item($i);
 		$data[] = array(
-			'name'	=> $rule->Name,
-			'rid'	 => $rule->ID,
-			'enabled' => $rule->Active ?: 0
+			'name'    => $obRule->Name,
+			'rid'     => $obRule->ID,
+			'enabled' => $obRule->Active ?: 0
 		);
 	}
 	return $data;
 }
 
-function ruleLoad($rule)
+function ruleLoad($obRule)
 {
-	$data = array();
-
-	$data['name'] = $rule->Name;
-	$data['active'] = $rule->Active ?: 0;
-	$data['useand'] = $rule->UseAND ?: 0;
-
-	$data['criterias'] = array();
-	$criterias = $rule->Criterias;
-	$count = $criterias->Count;
+	$data = array(
+		'name'      => $obRule->Name,
+		'active'    => $obRule->Active ?: 0,
+		'useand'    => $obRule->UseAND ?: 0,
+		'criterias' => array(),
+		'actions'   => array()
+	);
+	$obCriterias = $obRule->Criterias;
+	$count = $obCriterias->Count;
 	for ($i = 0; $i < $count; $i++) {
-		$c = array();
-		$criteria = $criterias->Item($i);
-		$c['id'] = $criteria->ID;
-		$c['usepredefined'] = $criteria->UsePredefined ?: 0;
-
-		$c['predefinedfield'] = $criteria->PredefinedField;
-		$c['headerfield'] = $criteria->HeaderField;
-
-		$c['matchtype'] = $criteria->MatchType;
-		$c['matchvalue'] = $criteria->MatchValue;
+		$obCriteria = $obCriterias->Item($i);
+		$c = array(
+			'id'              => $obCriteria->ID,
+			'usepredefined'   => $obCriteria->UsePredefined ?: 0,
+			'predefinedfield' => $obCriteria->PredefinedField,
+			'headerfield'     => $obCriteria->HeaderField,
+			'matchtype'       => $obCriteria->MatchType,
+			'matchvalue'      => $obCriteria->MatchValue
+		);
 		$data['criterias'][] = $c;
 	}
 
-	$data['actions'] = array();
-	$actions = $rule->Actions;
-	$count = $actions->Count;
+	$obActions = $obRule->Actions;
+	$count = $obActions->Count;
 	for ($i = 0; $i < $count; $i++) {
-		$a = array();
-		$action = $actions->Item($i);	
-		$a['id'] = $action->ID;
-		$a['type'] = $action->Type;
+		$obAction = $obActions->Item($i);
+		$a = array(
+			'id'   => $obAction->ID,
+			'type' => $obAction->Type
+		);
 		$data['actions'][] = $a;
 	}
 
