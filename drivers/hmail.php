@@ -3,10 +3,10 @@
 /**
  * hMailserver rules driver
  *
- * @version 1.2
+ * @version 1.3
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
- * Copyright (C) 2017, Andreas Tunberg
+ * Copyright (C) 2026, Andreas Tunberg
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -200,7 +200,8 @@ class rcube_hmail_rules
                         'body'           => $obAction->Body,
                         'headername'     => $obAction->HeaderName,
                         'value'          => $obAction->Value,
-                        'type'           => $obAction->Type
+                        'type'           => $obAction->Type,
+                        'abortspam'      => $obAction->AbortSpamFlagged ?: 0
                     );
                     return $actdata;
                 case 'action_edit':
@@ -220,6 +221,7 @@ class rcube_hmail_rules
                     $obAction->Body = $data['body'];
                     $obAction->HeaderName = $data['headername'];
                     $obAction->Value = $data['value'];
+                    $obAction->AbortSpamFlagged = $data['abortspam'] == null ? 0 : 1;
                     $obAction->Save();
                     $obRule->Save();
                     return array('aid' => $obAction->ID);

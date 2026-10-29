@@ -3,10 +3,10 @@
 /**
  * hMailServer Rules Plugin for Roundcube
  *
- * @version 1.2
+ * @version 1.3
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
- * Copyright (C) 2017, Andreas Tunberg
+ * Copyright (C) 2026, Andreas Tunberg
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -226,6 +226,9 @@ class hms_rules extends rcube_plugin
 
         if ($action = rcube_utils::get_input_value('_act', rcube_utils::INPUT_POST)) {
 
+            $type = rcube_utils::get_input_value('_type', rcube_utils::INPUT_POST);
+            $abortspam = ($type == 2) ? rcube_utils::get_input_value('_fabortspam', rcube_utils::INPUT_POST) : rcube_utils::get_input_value('_rabortspam', rcube_utils::INPUT_POST);
+
             $dataToSave = array(
                 'action'         => 'action_edit', 
                 'rid'            => $this->rid,
@@ -239,7 +242,8 @@ class hms_rules extends rcube_plugin
                 'body'           => rcube_utils::get_input_value('_body', rcube_utils::INPUT_POST, true),
                 'headername'     => rcube_utils::get_input_value('_headername', rcube_utils::INPUT_POST),
                 'value'          => rcube_utils::get_input_value('_value', rcube_utils::INPUT_POST),
-                'type'           => rcube_utils::get_input_value('_type', rcube_utils::INPUT_POST)
+                'type'           => $type,
+                'abortspam'      => $abortspam
             );
             $result = $this->_save($dataToSave, true);
 
@@ -699,7 +703,8 @@ class hms_rules extends rcube_plugin
                 'body'           => '',
                 'headername'     => '',
                 'value'          => '',
-                'type'           => 0
+                'type'           => 0,
+                'abortspam'      => 0
             );
         }
 
@@ -761,6 +766,15 @@ class hms_rules extends rcube_plugin
 
         $panel = html::label($field_id, rcube::Q($this->gettext('to'))) . html::br() . $input_to->show($currentData['to']);
 
+        $field_id = 'fabortspam';
+        $input_fabortspam = new html_checkbox(array (
+                'name'      => '_fabortspam',
+                'id'        => $field_id,
+                'value' => 1
+        ));
+
+        $panel .= html::label($field_id, rcube::Q($this->gettext('abortspam'))) . html::br() . $input_fabortspam->show($currentData['abortspam']);
+
         $panels .= html::div(array('id' => 'panel-2', 'style'=>'display: none', 'class' => 'panel'), $panel);
 
 
@@ -803,6 +817,15 @@ class hms_rules extends rcube_plugin
         ));
 
         $panel .= html::br() . html::label($field_id, rcube::Q($this->gettext('body'))) . html::br() . $input_body->show($currentData['body']);
+
+        $field_id = 'rabortspam';
+        $input_rabortspam = new html_checkbox(array (
+                'name'      => '_rabortspam',
+                'id'        => $field_id,
+                'value' => 1
+        ));
+
+        $panel .= html::label($field_id, rcube::Q($this->gettext('abortspam'))) . html::br() . $input_rabortspam->show($currentData['abortspam']);
 
         $panels .= html::div(array('id' => 'panel-3', 'style' => 'display: none', 'class' => 'panel'), $panel);
 

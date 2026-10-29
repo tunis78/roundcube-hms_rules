@@ -46,6 +46,7 @@ $labels['fromaddress'] = 'From (Address)';
 $labels['imapfolder'] = 'IMAP folder';
 $labels['headername'] = 'Header name';
 $labels['scriptfunction'] = 'Script function';
+$labels['abortspam'] = 'Abort on messages marked as spam';
 
 
 // Predefined Field Type

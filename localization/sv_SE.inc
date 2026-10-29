@@ -44,6 +44,7 @@ $labels['fromaddress'] = 'Från (Address)';
 $labels['imapfolder'] = 'IMAP-mapp';
 $labels['headername'] = 'Header-namn';
 $labels['scriptfunction'] = 'Skriptfunktion';
+$labels['abortspam'] = 'Avbryt vid meddelanden markerade som skräppost';
 
 
 // Predefined Field Type

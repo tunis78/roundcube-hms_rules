@@ -3,10 +3,10 @@
 /**
  * hMailserver remote rules changer
  *
- * @version 1.2
+ * @version 1.3
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
- * Copyright (C) 2017, Andreas Tunberg
+ * Copyright (C) 2026, Andreas Tunberg
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,7 +127,8 @@ try {
 				'body' => $obAction->Body,
 				'headername' => $obAction->HeaderName,
 				'value' => $obAction->Value,
-				'type' => $obAction->Type
+				'type' => $obAction->Type,
+				'abortspam' => $obAction->AbortSpamFlagged ?: 0
 			);
 			sendResult($actdata);
 		case 'action_edit':
@@ -147,6 +148,7 @@ try {
 			$obAction->Body = $_POST['body'];
 			$obAction->HeaderName = $_POST['headername'];
 			$obAction->Value = $_POST['value'];
+			$obAction->AbortSpamFlagged = isset($_POST['abortspam']) ?: 0;
 			$obAction->Save();
 			$obRule->Save();
 			sendResult(array('aid' => $obAction->ID));

@@ -1,0 +1,46 @@
+#identities-table tr.disabled {
+    font-style:italic;
+}
+
+.boxfooter .listbutton.moveup .inner {
+    background-image: url("images/buttons.png?v=1");
+    background-position: 10px -2px;
+}
+
+.boxfooter .listbutton.movedown .inner {
+    background-image: url("images/buttons.png?v=1");
+    background-position: 10px -42px;
+}
+
+table.propform th {
+    text-align:left;
+    padding-left: 12px;
+}
+
+table.propform td.tdcriteria {
+    width: 20%;
+}
+
+table.propform td.tdtype {
+    width: 25%;
+}
+
+table.propform td.tdvalue {
+    width: 30%;
+}
+
+table.propform td.tdaction {
+    width: 50%;
+}
+
+table.propform td.tdmove {
+    width: 25%;
+}
+
+table.propform td.tdactions {
+    width: 25%;
+}
+
+div.panel input, div.panel textarea {
+    margin: 3px 0 5px;
+}
