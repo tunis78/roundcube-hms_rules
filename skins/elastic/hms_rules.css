@@ -2,19 +2,16 @@
     font-style:italic;
 }
 
-.boxfooter .listbutton.moveup .inner {
-    background-image: url("images/buttons.png?v=1");
-    background-position: 10px -2px;
+#identities-table.rules-list td.name::before {
+    content: "\f0b0";
 }
 
-.boxfooter .listbutton.movedown .inner {
-    background-image: url("images/buttons.png?v=1");
-    background-position: 10px -42px;
+#toolbar-menu li a.moveup::before {
+    content: "\f077";
 }
 
-table.propform th {
-    text-align:left;
-    padding-left: 12px;
+#toolbar-menu li a.movedown::before {
+    content: "\f078";
 }
 
 table.propform td.tdcriteria {
@@ -43,4 +40,12 @@ table.propform td.tdactions {
 
 div.panel input, div.panel textarea {
     margin: 3px 0 5px;
+}
+
+.propform input#predefinedfield ~ select:last-child, .propform input#customheaderfield ~ input:last-child {
+    width: 80%;
+}
+
+.propform input#predefinedfield, .propform input#customheaderfield{
+    margin-right: .5rem;
 }

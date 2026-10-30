@@ -1,0 +1,14 @@
+<roundcube:include file="includes/layout.html" />
+
+<h1 class="voice"><roundcube:label name="hms_rules.editrulefromtitle" /></h1>
+
+<div class="formcontent">
+	<roundcube:object name="plugin.ruleform" class="propform" compact-form="false" />
+</div>
+
+<div class="formbuttons">
+	<roundcube:button command="plugin.hmsrule-submit" class="btn btn-primary submit" label="save" condition="!env:rules_reload" />
+	<roundcube:object name="plugin.abort" />
+</div>
+
+<roundcube:include file="includes/footer.html" />
