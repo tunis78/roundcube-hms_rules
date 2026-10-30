@@ -421,7 +421,7 @@ class hms_rules extends rcube_plugin
 
     function rule_criterias($criterias)
     {
-        $table = new html_table(array('cols' => 4, 'class' => 'propform'));
+        $table = new html_table(array('cols' => 4, 'class' => 'propform rules'));
         $table->add_header(null, $this->gettext('field'));
         $table->add_header(null, $this->gettext('comparison'));
         $table->add_header(null, $this->gettext('value'));
@@ -468,7 +468,7 @@ class hms_rules extends rcube_plugin
 
     function rule_actions($actions)
     {
-        $table = new html_table(array('cols' => 3, 'class' => 'propform'));
+        $table = new html_table(array('cols' => 3, 'class' => 'propform rules'));
         $table->add_header(null, $this->gettext('action'));
         $count = count($actions);
         for ($i = 0; $i < $count; $i++) {

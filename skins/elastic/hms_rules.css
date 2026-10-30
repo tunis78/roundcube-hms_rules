@@ -14,7 +14,7 @@
     content: "\f078";
 }
 
-table.propform td.tdcriteria {
+/*table.propform td.tdcriteria {
     width: 20%;
 }
 
@@ -40,7 +40,7 @@ table.propform td.tdactions {
 
 div.panel input, div.panel textarea {
     margin: 3px 0 5px;
-}
+}*/
 
 .propform input#predefinedfield ~ select:last-child, .propform input#customheaderfield ~ input:last-child {
     width: 80%;
@@ -48,4 +48,17 @@ div.panel input, div.panel textarea {
 
 .propform input#predefinedfield, .propform input#customheaderfield{
     margin-right: .5rem;
+}
+
+#layout:has(div.rules) {
+    overflow: scroll;
+    display: block;
+}
+
+.rules .form-group.row {
+    display: table-row;
+}
+
+.formbuttons.rules {
+    padding: 1rem;
 }
