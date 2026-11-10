@@ -3,7 +3,7 @@
 /**
  * hMailServer Rules Plugin for Roundcube
  *
- * @version 1.3
+ * @version 1.4
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
  * Copyright (C) 2026, Andreas Tunberg
