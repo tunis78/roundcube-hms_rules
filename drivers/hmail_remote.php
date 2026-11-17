@@ -3,7 +3,7 @@
 /**
  * hMailserver remote rules driver
  *
- * @version 1.1
+ * @version 1.2
  * @author Andreas Tunberg <andreas@tunberg.com>
  *
  * Copyright (C) 2026, Andreas Tunberg
@@ -98,7 +98,7 @@ class rcube_hmail_remote_rules
         else
             $return = 'Curl error: ' . curl_error($ch);
 
-        curl_close($ch);
+        unset($ch);
         return $return;
     }
 }
